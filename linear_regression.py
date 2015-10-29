@@ -69,6 +69,9 @@ simplifiedFICO = loansData['FICO.Range'].map(lambda x: int(x[:3]))
 # Apply changes to the original data set.
 loansData['FICO.Score'] = simplifiedFICO
 
+# Save the cleaned data to a CSV file.
+loansData.to_csv('loansData_clean.csv', header=True, index=False)
+
 # Plot a histogram of FICO scores.
 plt.figure()
 p = loansData['FICO.Score'].hist()
@@ -78,7 +81,7 @@ plt.show()
 a = pd.scatter_matrix(loansData, alpha=0.05, figsize=(10,10), diagonal='hist')
 plt.show()
 
-# Create a linear regression two independent variables (FICO Score and Loan Amount) to help determine the dependent variable (Interest Rate).
+# Create a linear regression with two independent variables (FICO Score and Loan Amount) to help determine the dependent variable (Interest Rate).
 intrate = loansData['Interest.Rate']
 loanamt = loansData['Amount.Requested']
 fico = loansData['FICO.Score']
@@ -92,12 +95,3 @@ X = sm.add_constant(x)
 model = sm.OLS(y,X)
 f = model.fit()
 print f.summary()
-
-
-
-
-
-
-
-
-
