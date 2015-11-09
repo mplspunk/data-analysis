@@ -45,6 +45,6 @@ def logistic_function(FICOScore, AmountRequested):
 	if p > .70:
 		print str(p) + " Congratulations! You are funded at a competitive interest rate!"
 	else:
-		print str(p) + " Unfortunately, we are not able to offer you a loan at a interest rate below 12%."
+		print str(p) + " Unfortunately, we are not able to offer you a loan at an interest rate below 12%."
 
 logistic_function(750, 10000)
