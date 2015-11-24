@@ -78,10 +78,12 @@ p = loansData['FICO.Score'].hist()
 plt.show()
 
 # Create a scatterplot matrix.
-a = pd.scatter_matrix(loansData, alpha=0.05, figsize=(10,10), diagonal='hist')
+a = pd.scatter_matrix(loansData, alpha=0.05, figsize=(10, 10), diagonal='hist')
 plt.show()
 
-# Create a linear regression with two independent variables (FICO Score and Loan Amount) to help determine the dependent variable (Interest Rate).
+# Create a linear regression with two independent variables 
+# (FICO Score and Loan Amount) to help determine the dependent 
+# variable (Interest Rate).
 intrate = loansData['Interest.Rate']
 loanamt = loansData['Amount.Requested']
 fico = loansData['FICO.Score']
@@ -89,9 +91,9 @@ fico = loansData['FICO.Score']
 y = np.matrix(intrate).transpose()
 x1 = np.matrix(fico).transpose()
 x2 = np.matrix(loanamt).transpose()
-x = np.column_stack([x1,x2])
+x = np.column_stack([x1, x2])
 
 X = sm.add_constant(x)
-model = sm.OLS(y,X)
+model = sm.OLS(y, X)
 f = model.fit()
 print f.summary()
