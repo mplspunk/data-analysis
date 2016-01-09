@@ -1,8 +1,10 @@
 from bs4 import BeautifulSoup
 import csv
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import requests
+import statsmodels.api as sm
 
 
 # Import UN webpage for scraping
@@ -152,6 +154,8 @@ if r.ok:
         lambda x: x['Country'].rstrip(), axis=1)
     dfUNCodes['ISOCode'] = dfUNCodes.apply(
         lambda x: x['ISOCode'].lstrip(), axis=1)
+    dfUNCodes['ISOCode'] = dfUNCodes.apply(
+        lambda x: x['ISOCode'].rstrip(), axis=1)
 
     # Write data to CSV file
     dfUNCodes.to_csv('un_codes.csv', encoding='utf-8', index=False)
@@ -166,5 +170,56 @@ dfGDPData.columns = dfGDPData.columns.str.replace('Country Code', 'ISOCode')
 
 # Merge updated UN data with the World Bank dataframe on the country code
 dfAll_merged = pd.merge(dfUN_merged, dfGDPData, on='ISOCode', how='inner')
+
+# Verify data types are compatible for running regression
+dfAll_merged.info()
+# <class 'pandas.core.frame.DataFrame'>
+# Int64Index: 162 entries, 0 to 161
+# Data columns (total 19 columns):
+# Country          162 non-null object
+# Year             162 non-null object
+# Total            162 non-null object
+# Men              162 non-null object
+# Women            162 non-null object
+# NumericalCode    162 non-null object
+# ISOCode          162 non-null object
+# 1999             162 non-null float64
+# 2000             162 non-null float64
+# 2001             162 non-null float64
+# 2002             162 non-null float64
+# 2003             162 non-null float64
+# 2004             162 non-null float64
+# 2005             162 non-null float64
+# 2006             162 non-null float64
+# 2007             162 non-null float64
+# 2008             162 non-null float64
+# 2009             162 non-null float64
+# 2010             162 non-null float64
+# dtypes: float64(12), object(7)
+# memory usage: 25.3+ KB
+
+# Convert 'Men', 'Women', and 'Total' to floats
+dfAll_merged[['Men', 'Women', 'Total']] = dfAll_merged[['Men', 'Women', 'Total']].astype(float)
+
+# Do a log-transform of the GDP to get a scale that can be used to compare
+years = (['1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006', 
+        '2007', '2008', '2009', '2010'])
+
+for year in years:
+    dfAll_merged[year + 'L'] = dfAll_merged[year].apply(lambda x: np.log(x))
+
+
+# Create a linear model with log GDP (dependent) and education (independent)
+loggdp = dfAll_merged[['1999L', '2000L', '2001L', '2002L', '2003L', '2004L', 
+        '2005L', '2006L', '2007L', '2008L', '2009L', '2010L']].mean(axis=1)
+education = dfAll_merged['Total']
+
+y = np.matrix(loggdp).transpose()
+x = np.matrix(education).transpose()
+
+X = sm.add_constant(x)
+model = sm.OLS(y,X)
+results = model.fit()
+print results.summary()
 
 
